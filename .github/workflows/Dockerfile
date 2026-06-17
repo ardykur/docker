@@ -2,16 +2,15 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install basic
+# Install dependencies
 RUN apt update && apt install -y \
-    sudo \
-    wget \
-    curl \
-    xfce4 \
-    xfce4-goodies \
+    xfce4 xfce4-goodies \
     xrdp \
-    dbus-x11 \
-    x11-xserver-utils \
+    wget curl sudo \
+    dbus-x11 x11-xserver-utils \
+    tigervnc-standalone-server \
+    novnc websockify \
+    net-tools \
     && apt clean
 
 # Install Anydesk
@@ -20,17 +19,22 @@ RUN wget -qO - https://keys.anydesk.com/repos/DEB-GPG-KEY | apt-key add - \
     && apt update \
     && apt install -y anydesk
 
-# Setup user
-RUN useradd -m user \
-    && echo "ardy28:Dualapan28" | chpasswd \
-    && adduser user sudo
+# Create user
+RUN useradd -m user && echo "ardy28:Dualapan28" | chpasswd && adduser user sudo
 
-# Setup XFCE session
-RUN echo "startxfce4" > /home/user/.xsession
+# XFCE session
+RUN echo "startxfce4" > /home/user/.xsession && chown user:user /home/user/.xsession
 
-# XRDP config
-RUN sed -i 's/3389/3389/g' /etc/xrdp/xrdp.ini
+# Setup VNC password
+RUN mkdir -p /home/user/.vnc \
+    && echo "Dualapan28" | vncpasswd -f > /home/user/.vnc/passwd \
+    && chmod 600 /home/user/.vnc/passwd \
+    && chown -R user:user /home/user/.vnc
 
-EXPOSE 3389
+# Copy startup script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
-CMD service dbus start && service xrdp start && tail -f /dev/null
+EXPOSE 3389 6080
+
+CMD ["/start.sh"]
