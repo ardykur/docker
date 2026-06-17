@@ -4,6 +4,10 @@ on:
   push:
     branches: ["main"]
 
+permissions:
+  contents: read
+  packages: write   # 🔥 WAJIB ini
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,5 +25,7 @@ jobs:
       - name: Build & Push
         uses: docker/build-push-action@v5
         with:
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ghcr.io/ardykur/ubuntu-rdp:latest
