@@ -22,7 +22,7 @@ RUN wget -qO - https://keys.anydesk.com/repos/DEB-GPG-KEY | apt-key add - \
 
 # Setup user
 RUN useradd -m user \
-    && echo "user:user" | chpasswd \
+    && echo "ardy28:Dualapan28" | chpasswd \
     && adduser user sudo
 
 # Setup XFCE session
